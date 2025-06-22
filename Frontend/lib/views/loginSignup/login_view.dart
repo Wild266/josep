@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
 
@@ -15,12 +14,11 @@ class LoginView extends StatelessWidget {
         );
       }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google sign in failed: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Google sign in failed: $error')));
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +63,11 @@ class LoginView extends StatelessWidget {
 
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Username: $username, Password: $password')),
+                      SnackBar(
+                        content: Text(
+                          'Username: $username, Password: $password',
+                        ),
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -94,7 +96,6 @@ class LoginView extends StatelessWidget {
                   },
                   child: const Text('Forgot Password?'),
                 ),
-
               ],
             ),
           ),
