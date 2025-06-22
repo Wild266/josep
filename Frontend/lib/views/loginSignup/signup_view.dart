@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:bcrypt/bcrypt.dart';
+import 'package:http/http.dart' as http;
+import '../../apicalls/user_apis.dart' as user_apis;
 
 class SignupView extends StatelessWidget {
   const SignupView({super.key});
+
+  bool isPasswordStrong(String password) {
+    final passwordRegExp = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$');
+    return passwordRegExp.hasMatch(password);
+  }
+
+  String hashPassword(String password) {
+    return BCrypt.hashpw(password, BCrypt.gensalt());
+  }
 
   Future<void> _handleGoogleSignUp(BuildContext context) async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -77,7 +89,7 @@ class SignupView extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     // TODO: Handle sign up logic
                     final username = usernameController.text;
                     final email = emailController.text;
@@ -90,10 +102,39 @@ class SignupView extends StatelessWidget {
                       );
                       return;
                     }
-
-                    // TODO: Send data to backend for registration
+                  final available = await user_apis.UserApis.isUsernameAvailable(username);
+                  if (!available) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Signed up as $username ($email)')),
+                      const SnackBar(content: Text('Username is already taken')),
+                    );
+                    return;
+                  }
+
+                    final hashedPassword = hashPassword(password);
+                    try {
+                      final response = await user_apis.UserApis.registerUser(
+                        username: username,
+                        email: email,
+                        password: hashedPassword,
+                      );
+
+                      if (response.success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Registration successful!')),
+                        );
+                        // Navigate or clear fields as needed
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Registration failed: ${response.message}')),
+                        );
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: $e')),
+                      );
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Username: $username, Email: $email')),
                     );
                   },
                   style: ElevatedButton.styleFrom(
