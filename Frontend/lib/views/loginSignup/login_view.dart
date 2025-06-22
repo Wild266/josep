@@ -3,7 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
-git a
+
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
     try {
