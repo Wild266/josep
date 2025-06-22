@@ -623,7 +623,7 @@ class _HomeViewState extends State<HomeView>
                         ),
                         const SizedBox(width: 12),
                         const Text(
-                          'Planot',
+                          'PlanIt',
                           style: TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.w800,

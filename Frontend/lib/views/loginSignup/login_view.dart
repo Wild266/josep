@@ -10,7 +10,6 @@ class LoginView extends StatelessWidget {
     try {
       final account = await googleSignIn.signIn();
       if (account != null) {
-        // TODO: Handle successful sign in (e.g., navigate or authenticate with backend)
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Signed in as ${account.displayName}')),
         );
@@ -63,7 +62,7 @@ class LoginView extends StatelessWidget {
                     final username = usernameController.text;
                     final password = passwordController.text;
 
-                    
+
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Username: $username, Password: $password')),

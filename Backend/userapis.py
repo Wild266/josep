@@ -1,8 +1,18 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+
 import psycopg2
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or specify your frontend URL for better security
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 DB_HOST = "planitdb.c30c2ai28fyz.us-east-2.rds.amazonaws.com"
 DB_NAME = "postgres"
@@ -11,7 +21,6 @@ DB_PASSWORD = "dixie123"
 DB_PORT = 5432
 
 class User(BaseModel):
-    id: int
     username: str
     password: str
     email: str
@@ -33,14 +42,15 @@ def create_user(user: User):
         conn = get_conn()
         cur = conn.cursor()
         cur.execute(
-            "INSERT INTO users (id, username, password, email, rating, role) VALUES (%s, %s, %s, %s, %s, %s)",
-            (user.id, user.username, user.password, user.email, user.rating, user.role)
+            "INSERT INTO users ( username, password, email, rating, role) VALUES ( %s, %s, %s, %s, %s)",
+            (user.username, user.password, user.email, user.rating, user.role)
         )
         conn.commit()
         cur.close()
         conn.close()
         return {"message": "User created"}
     except Exception as e:
+        print("Error in create_user:", e) 
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/users/{user_id}")
