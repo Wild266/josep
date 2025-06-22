@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../common/google_auth_button.dart';
 
 /// Authentication card shown inside the modal when the user chooses “Log in”.
 ///
@@ -158,25 +159,9 @@ class _LoginCardState extends State<LoginCard> {
                 const SizedBox(height: 20),
 
                 // Google sign-in
-                OutlinedButton.icon(
-                  icon: Image.asset(
-                    'assets/googlelogo.png',
-                    height: 24,
-                    width: 24,
-                  ),
-                  label: const Text(
-                    'Sign in with Google',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                GoogleAuthButton(
+                  text: 'Sign in with Google',
                   onPressed: _handleGoogleSignIn,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.black87,
-                    side: BorderSide(color: Colors.grey[300]!),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 24),
 
