@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'planet_painter.dart';
+import 'planet_widget.dart';
 import 'auth/login_card.dart';
 import 'auth/signup_card.dart';
 
@@ -12,6 +12,9 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
+  // ---------- mouse ----------
+  final ValueNotifier<Offset> _mouse = ValueNotifier(Offset.zero);
+
   // ---------- animations ----------
   late final AnimationController _animationController;
   late final Animation<double> _fadeAnimation;
@@ -23,12 +26,10 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   late final Animation<double> _modalScaleAnimation;
 
   // ---------- UI state ----------
-  Offset _mousePosition = Offset.zero;
   bool _isLoginHovered = false;
   bool _showModal = false;
   bool _isLoginMode = true;
 
-  // ---------- lifecycle ----------
   @override
   void initState() {
     super.initState();
@@ -75,6 +76,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   void dispose() {
     _animationController.dispose();
     _modalController.dispose();
+    _mouse.dispose();
     super.dispose();
   }
 
@@ -98,7 +100,11 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onHover: (e) => setState(() => _mousePosition = e.position),
+      // tracks mouse EVERYWHERE
+      onHover: (e) {
+        if (!_showModal)
+          _mouse.value = e.position; // ignore while modal visible
+      },
       child: Scaffold(
         body: Stack(
           children: [
@@ -175,31 +181,16 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildHeroPlanet(context),
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: PlanetWidget(mouse: _mouse), // ← pass notifier
+              ),
+            ),
             const SizedBox(height: 48),
             _buildContentSection(),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeroPlanet(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 360, maxHeight: 360),
-          child: LayoutBuilder(
-            builder: (_, c) => CustomPaint(
-              size: Size(c.maxWidth, c.maxHeight),
-              painter: PlanetPainter(
-                mousePosition: _mousePosition,
-                screenSize: MediaQuery.of(context).size,
-              ),
-            ),
-          ),
         ),
       ),
     );
