@@ -161,7 +161,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           Icon(Icons.calendar_month_rounded, color: Colors.white, size: 36),
           SizedBox(width: 12),
           Text(
-            'Planot',
+            'PlanIt',
             style: TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.w800,
