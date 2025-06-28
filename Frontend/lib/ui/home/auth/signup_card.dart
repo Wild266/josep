@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:bcrypt/bcrypt.dart';
+import 'package:http/http.dart' as http;
+import '../../../apicalls/user_apis.dart' as user_apis;
 
 /// Authentication card shown when the user chooses “Sign Up”.
 /// Contains a basic form, Google-sign-up demo, and callbacks to
@@ -11,6 +14,17 @@ class SignupCard extends StatefulWidget {
     required this.onSwitchToLogin,
   }) : super(key: key);
 
+  bool isPasswordStrong(String password) {
+    final passwordRegExp = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$');
+    return passwordRegExp.hasMatch(password);
+  }
+
+  String hashPassword(String password) {
+    return BCrypt.hashpw(password, BCrypt.gensalt());
+  }
+
+
+  /// Callback when the user closes the modal.
   /// Closes the modal.
   final VoidCallback onClose;
 
@@ -301,7 +315,7 @@ class _SignupCardState extends State<SignupCard> {
   // ---------------------------------------------------------------------------
   // logic
   // ---------------------------------------------------------------------------
-  void _onSignUpPressed() {
+  void  _onSignUpPressed() async {
     final username = _usernameC.text;
     final email = _emailC.text;
     final password = _passwordC.text;
@@ -314,9 +328,30 @@ class _SignupCardState extends State<SignupCard> {
       return;
     }
 
-    // Demo feedback – replace with real sign-up logic.
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Signed up as $username ($email)')));
+    final available = await user_apis.UserApis.isUsernameAvailable(username);
+    if (available) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username is already taken')),
+      );
+      return;
+    }
+    final hashedPassword = widget.hashPassword(password);
+
+    try {
+      final response = await user_apis.UserApis.registerUser(
+        username: username,
+        email: email,
+        password: hashedPassword,
+      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Signed up as $username ($email)')));
+      widget.onClose();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+
   }
 }

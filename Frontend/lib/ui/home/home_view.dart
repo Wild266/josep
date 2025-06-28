@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'planet_widget.dart';
 import 'auth/login_card.dart';
 import 'auth/signup_card.dart';
+import '../../../objects/user_session.dart' as user_session;
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -124,12 +125,13 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF667eea),
-            Color(0xFF764ba2),
-            Color(0xFF6B8DD6),
-            Color(0xFF8E37D7),
+            Color.fromARGB(255, 218, 164, 206),
+            Color.fromARGB(255, 203, 156, 132),
+            Color.fromARGB(255, 70, 133, 81),
+            Color.fromARGB(255, 227, 220, 122),
+            Color.fromARGB(255, 255, 252, 245),
           ],
-          stops: [0.0, 0.3, 0.7, 1.0],
+          stops: [0, 0.25, 0.5, 0.85, 1.0],
         ),
       ),
       child: Container(
@@ -154,19 +156,76 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
 
   Widget _buildHeader() {
     return Container(
+      
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.calendar_month_rounded, color: Colors.white, size: 36),
-          SizedBox(width: 12),
-          Text(
-            'PlanIt',
-            style: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              letterSpacing: 1.2,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: const [
+              Icon(Icons.calendar_month_rounded, color: Colors.white, size: 36),
+              SizedBox(width: 12),
+              Text(
+                'PlanIt',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
+          ),
+        if (user_session.UserSession.username != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 50), // Adjust the value as needed
+              child:
+              GestureDetector(
+                onTapDown: (details) async {
+                  final selected = await showMenu(
+                    context: context,
+                    position: RelativeRect.fromLTRB(
+                      details.globalPosition.dx,
+                      details.globalPosition.dy + 40,
+                      details.globalPosition.dx,
+                      details.globalPosition.dy + 40,
+                    ),
+                    items: [
+                      PopupMenuItem(
+                        value: 'profile',
+                        child: Text('Profile'),
+                      ),
+                      PopupMenuItem(
+                        value: 'itineraries',
+                        child: Text('Your Itineraries'),
+                      ),
+                      PopupMenuItem(
+                        value: 'signout',
+                        child: Text('Sign Out'),
+                      ),
+                    ],
+                  );
+                  if (selected == 'profile') {
+                    // TODO: Navigate to profile page
+                  } else if (selected == 'itineraries') {
+                    // TODO: Navigate to itineraries page
+                  } else if (selected == 'signout') {
+                    user_session.UserSession.username = null;
+                    setState(() {}); // This will refresh the UI and hide user-only widgets
+                  }
+                },
+                child: CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Text(
+                    user_session.UserSession.username![0].toUpperCase(),
+                    style: const TextStyle(
+                      color: Color(0xFF764ba2),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
             ),
           ),
         ],
@@ -181,13 +240,77 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: PlanetWidget(mouse: _mouse), // ← pass notifier
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: PlanetWidget(mouse: _mouse),
+                      ),
+                    ),
+                    // Overlayed buttons
+                  Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 170),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 250, // Set your desired width
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  // TODO: Navigate to Make Itinerary page
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: const Color(0xFF764ba2),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Make an Itinerary',
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            SizedBox(
+                              width: 250, // Set your desired width
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  // TODO: Navigate to Search Itineraries page
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: const Color(0xFF764ba2),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Search Our Itineraries',
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
+
             const SizedBox(height: 48),
             _buildContentSection(),
           ],
@@ -242,6 +365,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   }
 
   Widget _buildPrimaryCta() {
+    if (user_session.UserSession.username != null) return const SizedBox.shrink();
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
@@ -273,6 +397,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   }
 
   Widget _buildLoginLink() {
+    if (user_session.UserSession.username != null) return const SizedBox.shrink();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

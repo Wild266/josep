@@ -25,11 +25,27 @@ class UserApis {
     final response = await http.get(
       Uri.parse('http://localhost:8000/users/check/$username'),
     );
-    if (response.statusCode == 200) {
+    if (response.statusCode != 200) {
       final result = response.body.contains('true');
       return result;
     }
     // If the endpoint returns 404 or error, treat as not available
     return false;
   }
+
+  static Future<dynamic> loginUser({
+  required String username,
+  required String password,
+  }) async {
+    final response = await http.post(
+      Uri.parse('http://localhost:8000/users/login/'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'username': username,
+        'password': password,
+      }),
+    );
+    return jsonDecode(response.body);
+  }
 }
+
