@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+import psycopg2
+import bcrypt
 
 import psycopg2
 
@@ -26,6 +28,10 @@ class User(BaseModel):
     email: str
     rating: int
     role: str
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 def get_conn():
     return psycopg2.connect(
@@ -66,6 +72,41 @@ def get_user(user_id: int):
             return User(id=row[0], username=row[1], password=row[2], email=row[3], rating=row[4], role=row[5])
         else:
             raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.get("/users/check/{username}")
+def get_user_by_username(username: str):
+    try:
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute("SELECT id, username, password, email, rating, role FROM users WHERE username = %s", (username,))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        print("helo user cchekc")
+        if row:
+            return True
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/users/login/")
+def login(request: LoginRequest):
+    try:
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute("SELECT password FROM users WHERE username = %s", (request.username,))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        print("hit login")
+        if row and bcrypt.checkpw(request.password.encode(), row[0].encode()):
+            return {"success": True, "message": "Login successful"}
+        else:
+            return {"success": False, "message": "Invalid username or password"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../common/google_auth_button.dart';
+import '../../../apicalls/user_apis.dart' as user_apis;
+import '../../../objects/user_session.dart' as user_session;
 
 /// Authentication card shown inside the modal when the user chooses “Log in”.
 ///
@@ -101,13 +103,11 @@ class _LoginCardState extends State<LoginCard> {
                 _passwordField(),
                 const SizedBox(height: 12),
 
-                // Forgot password
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // TODO: handle forgotten password
-                    },
+                      },
                     child: const Text(
                       'Forgot Password?',
                       style: TextStyle(color: Color(0xFF764ba2)),
@@ -118,14 +118,30 @@ class _LoginCardState extends State<LoginCard> {
 
                 // Sign in button
                 ElevatedButton(
-                  onPressed: () {
-                    // Only shows entered values – replace with real auth logic.
-                    final u = _usernameController.text;
-                    final p = _passwordController.text;
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Username: $u, Password: $p')),
-                    );
+                  onPressed: () async {
+                        final username = _usernameController.text;
+                        final password = _passwordController.text;
+                        try {
+                          final response = await user_apis.UserApis.loginUser(
+                            username: username,
+                            password: password,
+                          );
+                          if (response['success']) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Login successful!')),
+                            );
+                            user_session.UserSession.username = username;
+                            widget.onClose();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Login failed: ${response['message']}')),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $e')),
+                          );
+                        }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF764ba2),

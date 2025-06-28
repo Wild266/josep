@@ -96,12 +96,12 @@ class SignupView extends StatelessWidget {
                     final password = passwordController.text;
                     final confirmPassword = confirmPasswordController.text;
 
-                    if (password != confirmPassword) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Passwords do not match')),
-                      );
-                      return;
-                    }
+                  if (password != confirmPassword) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Passwords do not match')),
+                    );
+                    return;
+                  }
                   final available = await user_apis.UserApis.isUsernameAvailable(username);
                   if (!available) {
                     ScaffoldMessenger.of(context).showSnackBar(
