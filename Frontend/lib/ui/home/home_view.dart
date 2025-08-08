@@ -4,6 +4,7 @@ import 'planet_widget.dart';
 import 'auth/login_card.dart';
 import 'auth/signup_card.dart';
 import '../../../objects/user_session.dart' as user_session;
+import 'itin_start_card.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -30,6 +31,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
   bool _isLoginHovered = false;
   bool _showModal = false;
   bool _isLoginMode = true;
+  bool _showItinModal = false;
 
   @override
   void initState() {
@@ -96,6 +98,17 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       setState(() => _showModal = false);
     });
   }
+  void _showItinStartModal() {
+    setState(() {
+      _showItinModal = true;
+    });
+  }
+
+  void _hideItinStartModal() {
+    setState(() {
+      _showItinModal = false;
+    });
+  }
 
   // ---------- build ----------
   @override
@@ -109,8 +122,10 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       child: Scaffold(
         body: Stack(
           children: [
+
             _buildBackground(context),
             if (_showModal) _buildAuthModal(),
+            if (_showItinModal) _buildItinStartModal(),
           ],
         ),
       ),
@@ -265,7 +280,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                               width: 250, // Set your desired width
                               child: ElevatedButton(
                                 onPressed: () {
-                                  // TODO: Navigate to Make Itinerary page
+                                  _showItinStartModal();
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white,
@@ -499,6 +514,32 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
                         onSwitchToLogin: () =>
                             setState(() => _isLoginMode = true),
                       ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  Widget _buildItinStartModal() {
+    return GestureDetector(
+      onTap: _hideItinStartModal,
+      child: FadeTransition(
+        opacity: _modalFadeAnimation,
+        child: Container(
+          color: Colors.black.withOpacity(.5),
+          child: Center(
+            child: GestureDetector(
+              onTap: () {}, // stop tap-through
+              child: ScaleTransition(
+                scale: _modalScaleAnimation,
+                child: ItinStartCard(
+                  onClose: _hideItinStartModal,
+                  onSubmit: (city, dates) {
+                    // Handle itinerary creation here
+                    _hideItinStartModal();
+                  },
+                ),
               ),
             ),
           ),

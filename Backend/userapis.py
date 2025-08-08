@@ -41,7 +41,7 @@ def get_conn():
         password=DB_PASSWORD,
         port=DB_PORT
     )
-#hello
+
 @app.post("/users/")
 def create_user(user: User):
     try:
